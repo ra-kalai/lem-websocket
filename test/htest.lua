@@ -148,7 +148,7 @@ function tid(t)
 end
 
 GET('/ws', function(req, res)
-  local err, errMsg = websocketHandler.serverWebSocketHandler(req, res)
+  local err, errMsg = websocketHandler.serverHandler(req, res)
 
   if (err ~= nil) then
     res.status = 400

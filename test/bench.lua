@@ -33,7 +33,7 @@ end
 
 function expect(v, e, msg)
   if v ~= e then
-    print(msg .. ' got\n', v, 'expected\n', e)
+    print(msg .. ' got\n', v, #v, 'expected\n', e, #e)
     os.exit(1)
   end
 end
@@ -92,6 +92,7 @@ end
 print('### sha1 part look fine')
 
 local b64test = {
+	[''] = '',
 	['pleasure.'] = 'cGxlYXN1cmUu',
 	['leasure.']  = 'bGVhc3VyZS4=',
 	['easure.']   = 'ZWFzdXJlLg==',
@@ -117,6 +118,13 @@ for k, v in pairs(b64test) do
 	expect(val, v, "b64enc wrong for " .. k)
 end
 print('### b64encode part look fine')
+
+print('### b64decode part checking')
+for k, v in pairs(b64test) do
+	local val = websocketCore.base64decode(v)
+	expect(val, k, "b64dec wrong for " .. v)
+end
+print('### b64decode part look fine')
 
 
 print('### checking creation speed of frame')

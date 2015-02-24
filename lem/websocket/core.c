@@ -34,9 +34,24 @@ lem_base64encode(lua_State *T) {
   int b64string_len = b64_out_buffer_size((int)buf_len);
   unsigned char *b64string = alloca(b64string_len);
 
-  b64_enc((unsigned const char *)buf, buf_len, b64string);
+  b64_enc((const uint8_t *)buf, buf_len, b64string);
 
   lua_pushlstring(T, (const char*)b64string, b64string_len);
+
+  return 1;
+}
+
+static int
+lem_base64decode(lua_State *T) {
+  size_t buf_len;
+  const char *buf = lua_tolstring(T, -1, &buf_len);
+
+  int out_len = b64_dec_out_buffer_size((const uint8_t *)buf, (int)buf_len);
+  unsigned char *out_buf = alloca(out_len);
+
+  b64_dec((uint8_t *)buf, buf_len, out_buf);
+
+  lua_pushlstring(T, (const char*)out_buf, out_len);
 
   return 1;
 }
@@ -317,6 +332,7 @@ lem_websocket_buildframe(lua_State *T) {
 
 static const luaL_Reg lem_websocket_core_export[] = {
   {"base64encode",        lem_base64encode},
+  {"base64decode",        lem_base64decode},
   {"sha1",                lem_sha1},
   {"parseFrameHeader1",   lem_websocket_parse_frame_header1},
   {"parseFrameHeader2",   lem_websocket_parse_frame_header2},

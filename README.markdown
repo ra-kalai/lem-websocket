@@ -31,14 +31,18 @@ Import the module using something like
 
     local websocket = require 'lem.websocket.handler'
 
-This sets `websocket` to a table with a single function 
+This sets `websocket` to a table with two function:
 
-* __serverWebSocketHandler(req, res)__
+* __client(url)__
+  
+  ...
+
+* __serverHandler(req, res)__
   
   This function would normally be called inside a hathaway hook.   
   If the handshake failed, this function return a negative number, followed by an error.   
 
-  Otherwise; if the handshake has succeed, this function will return returning anything
+  Otherwise; if the handshake has succeed, this function will not be returning anything
   **and** the **res object** metatable will have been updated, to contains the following methods:
 
 * __res:close(msg={1000}"normal closure")__

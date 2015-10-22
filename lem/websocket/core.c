@@ -153,28 +153,29 @@ lem_websocket_parse_frame_header2(lua_State *T) {
 
   switch (buf_len) {
     case 2:
-      size  = buf[0] | ((int)(buf[1] << 8));
+      size  = buf[1] | ((uint32_t)(buf[0] << 8));
       break;
     case 4:
       key = alloca(4);
-      memmove(key, buf, 4);
+      memcpy(key, buf, 4);
       break;
     case 6:
-      size  = buf[0] | ((int)(buf[1] << 8));
+      size  = (uint32_t)buf[1]        |
+             ((uint32_t)(buf[0] << 8));
       key = alloca(4);
-      memmove(key, buf+2, 4);
+      memcpy(key, buf+2, 4);
       break;
     case 8:
-      size  =  buf[0] |
-             ((uint32_t)(buf[1]        << 8)) |
-             ((uint32_t)(buf[2]        << 16)) |
-             ((uint32_t)((buf[3]&0x7f) << 24)) ;
+      size  =   (uint32_t) buf[7]
+            |  ((uint32_t)(buf[6]       << 8))
+            |  ((uint32_t)(buf[5]       << 16))
+            | ((uint32_t)((buf[4]&0x7f) << 24));
       break;
     case 12:
-      size  =  buf[0] |
-             ((uint32_t)(buf[1]        << 8)) |
-             ((uint32_t)(buf[2]        << 16)) |
-             ((uint32_t)((buf[3]&0x7f) << 24)) ;
+      size  =   (uint32_t) buf[7]
+            |  ((uint32_t)(buf[6]       << 8))
+            |  ((uint32_t)(buf[5]       << 16))
+            | ((uint32_t)((buf[4]&0x7f) << 24));
 
       key = alloca(4);
       memmove(key, buf+8, 4);
@@ -277,12 +278,15 @@ lem_websocket_buildframe(lua_State *T) {
     frame[findex++] = (buf_len >>  8) & 0xff;
     frame[findex++] =  buf_len        & 0xff;
   } else if (payload_len == 127){
-    frame[findex++] = (buf_len >> 24) & 0xff;
+    frame[findex++] = 0;
+    frame[findex++] = 0;
+    frame[findex++] = 0;
+    frame[findex++] = 0;
+
+    frame[findex++] = 0;
     frame[findex++] = (buf_len >> 16) & 0xff;
+    frame[findex++] = (buf_len >> 8) & 0xff;
     frame[findex++] =  buf_len        & 0xff;
-    frame[findex++] = 0;
-    frame[findex++] = 0;
-    frame[findex++] = 0;
   }
 
   if (mask) {

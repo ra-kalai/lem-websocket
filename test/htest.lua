@@ -139,6 +139,7 @@ function brodcastMsg(msg)
 	for res, active in pairs(clientMap) do
 		if active then
 			local err, bla = res:sendText(msg)
+			print('res:sendText', err, bla)
 		end
 	end
 end
@@ -146,6 +147,22 @@ end
 function tid(t)
 	return tostring(t):gsub('table: ', '')
 end
+
+GET('/ws-test', function(req, res)
+  local err, errMsg = websocketHandler.serverHandler(req, res)
+
+  if (err ~= nil) then
+    res.status = 400
+	  res.headers['Content-Type'] = 'text/plain'
+	  res:add('Websocket Failure!\n' .. err .. "\n")
+		return 
+  end
+
+	err, payload = res:getFrame()
+  res:sendText(payload)
+  res:sendText("bye\n")
+  res:close();
+end)
 
 GET('/ws', function(req, res)
   local err, errMsg = websocketHandler.serverHandler(req, res)
@@ -163,6 +180,7 @@ GET('/ws', function(req, res)
 	nConn = nConn + 1
 	while true do
 		err, payload = res:getFrame()
+		print('res:getFrame', err, payload)
 		if err then
 			aalive = false 
 			clientMap[res] = nil

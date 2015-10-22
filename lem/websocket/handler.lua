@@ -135,7 +135,7 @@ function websocket_metatable:getFrame(strict)
     return -1, errmsg
   end
 
-	local fin, opcode, payload_len, mask = core.parseFrameHeader1(framePreamble)
+  local fin, opcode, payload_len, mask = core.parseFrameHeader1(framePreamble)
 
   local action = reactionOnOpcode[opcode]
 
@@ -150,11 +150,11 @@ function websocket_metatable:getFrame(strict)
     headerSecondPartLen = headerSecondPartLen + 4
   end
 
-	if (payload_len == 126) then
-	  headerSecondPartLen = headerSecondPartLen + 2
-	elseif (payload_len == 127) then
-	  headerSecondPartLen = headerSecondPartLen + 8
-	end
+  if (payload_len == 126) then
+    headerSecondPartLen = headerSecondPartLen + 2
+  elseif (payload_len == 127) then
+    headerSecondPartLen = headerSecondPartLen + 8
+  end
 
   if headerSecondPartLen ~= 0 then
     local frameSecondPart, errmsg = client:read(headerSecondPartLen)
@@ -163,7 +163,7 @@ function websocket_metatable:getFrame(strict)
       return -1, "On 2nd header part " .. errmsg
     end
 
-	  local finalPayloadLen, mask_key = core.parseFrameHeader2(frameSecondPart)
+    local finalPayloadLen, mask_key = core.parseFrameHeader2(frameSecondPart)
 
     if finalPayloadLen == nil then
       finalPayloadLen = payload_len
@@ -244,7 +244,7 @@ function serverWebSocketHandler(req, res)
 
   if version ~= '13' then
     res.status = 400
-	  res.headers['Sec-WebSocket-Version'] = 13
+    res.headers['Sec-WebSocket-Version'] = 13
     return -1, "need websocket v13"
   end
 
@@ -256,10 +256,9 @@ function serverWebSocketHandler(req, res)
 
   local secWebSocketAccept = base64encode(sha1(secWebSocketKey .. rfc6455GUID)) .. ''
 
-	res.headers['Connection'] = 'Upgrade'
-	res.headers['Upgrade'] = 'websocket'
-	res.headers['Sec-WebSocket-Accept'] = secWebSocketAccept
-
+  res.headers['Connection'] = 'Upgrade'
+  res.headers['Upgrade'] = 'websocket'
+  res.headers['Sec-WebSocket-Accept'] = secWebSocketAccept
 
   local rope = {}
   rope[1] = format('HTTP/%s 101 Switching Protocols\r\n', req.version)
@@ -281,18 +280,18 @@ end
 local client = require 'lem.http.client'
 
 function clientWebSocket(url)
-	local c = client.new()
+  local c = client.new()
 
   local randomb64string = string.rep('x',12)
                           :gsub('x', function ()
-                            return string.char(string.byte('A') + (math.random()*100)%25)
+                            return string.char(string.byte('A') + (math.random(100))%25)
                           end)
 
-	local res, err = c:get(url, {
-		['Sec-WebSocket-Version']= 13,
-		['Connection']= 'Upgrade',
-		['Upgrade']= 'WebSocket',
-		['Sec-WebSocket-Key']= randomb64string,
+  local res, err = c:get(url, {
+    ['Sec-WebSocket-Version']= 13,
+    ['Connection']= 'Upgrade',
+    ['Upgrade']= 'WebSocket',
+    ['Sec-WebSocket-Key']= randomb64string,
   })
 
   if res == nil then

@@ -20,31 +20,45 @@
 local utils  = require 'lem.utils'
 local websocket = require 'lem.websocket.handler'
 
-local url = arg[1] or 'http://localhost:8080/ws'
+local msgsizestart = arg[1] or 100
+local msgsizemax = arg[2] or 101
+local url = arg[3] or 'http://localhost:8080/ws-test'
 
-local running = 0
-utils.spawn(function ()
-	local err, res = websocket.client(url)
-	if not err then
-		res:sendText('["join"]')
-		utils.spawn(function () 
-			local err, payload
-			while err == nil do
+local keep_running
+
+utils.poolconfig(100, 10, 20)
+for msgsize = msgsizestart, msgsizemax do 
+
+	utils.spawn(function ()
+		local err, res = websocket.client(url)
+		local msg = string.rep("a", msgsize)
+	
+		if not err then
+			res:sendText(msg)
+			err, payload = res:getFrame()
+	
+			if payload == msg then
 				err, payload = res:getFrame()
-				print(err, payload)
+				if (payload == 'bye\n') then
+					print('ok', msgsize)
+				else
+					print('nok', msgsize)
+				end
+				keep_running = 0
 			end
-			running = 1
-		end)
-	else
-		print('error on connect', err, res)
-		running = 1
-	end
-end)
+			res:close()
+		else
+			print('error on connect', err, res)
+			keep_running = 0
+		end
+	end)
 
+	keep_running = 1
+end
 
 local sleeper = utils.newsleeper()
 repeat
 	sleeper:sleep(0.001)
-until running == 0
+until keep_running == 1
 
 -- vim: set ts=2 sw=2 noet:

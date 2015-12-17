@@ -263,7 +263,7 @@ function serverWebSocketHandler(req, res)
   local rope = {}
   rope[1] = format('HTTP/%s 101 Switching Protocols\r\n', req.version)
 
-  res:appendheader(rope, 1)
+  res:appendheader(rope)
 
   local client = req.client
   -- client:cork()

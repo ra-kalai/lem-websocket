@@ -22,6 +22,8 @@ local hathaway = require 'lem.hathaway'
 local websocketHandler = require 'lem.websocket.handler'
 local format = string.format
 
+utils.poolconfig(100, 10, 20)
+
 hathaway.debug = print -- must be set before import()
 hathaway.debug = function(...) end
 hathaway.import()      -- when using single instance API
@@ -36,9 +38,9 @@ GET('/', function(req, res)
 	res:add([[
 <html id=root>
 <head>
-  <title>Hathaway HTTP websocket</title>
-  <style type="text/css">
-    th { text-align:left; }
+	<title>Hathaway HTTP websocket</title>
+	<style type="text/css">
+	th { text-align:left; }
 		#root {
 			position: relative;
 			width: 100%%;
@@ -53,16 +55,15 @@ GET('/', function(req, res)
 			margin-top: -7px;
 			z-index: 2000;
 		}
-		
-  </style>
+	</style>
 </head>
 <body>
 
 <h2>Request</h2>
 <table>
-  <tr><th>Method:</th><td>%s</td></tr>
-  <tr><th>Uri:</th><td>%s</td></tr>
-  <tr><th>Version:</th><td>%s</td></tr>
+	<tr><th>Method:</th><td>%s</td></tr>
+	<tr><th>Uri:</th><td>%s</td></tr>
+	<tr><th>Version:</th><td>%s</td></tr>
 </table>
 
 <h2>Headers</h2>
@@ -102,7 +103,7 @@ GET('/', function(req, res)
 		mouse.y = e.clientY || e.pageY 
 	}, false);
 
-  var socket = new WebSocket(document.location.origin
+	var socket = new WebSocket(document.location.origin
 		.replace(/^http/,'ws')+"/ws");
 	socket.onmessage = function (msg) {
 		var msg = JSON.parse(msg.data);
@@ -116,16 +117,16 @@ GET('/', function(req, res)
 			}
 		}
 	};
-  socket.onopen = function () {
-    socket.send('["join"]');
+	socket.onopen = function () {
+		socket.send('["join"]');
 		var oldx = mouse.x, oldy = mouse.y;
 		setInterval(function () {
 			if ((oldx !== mouse.x)||(oldy != mouse.y)) {
 				oldx = mouse.x; oldy = mouse.y;
-    		socket.send('['+oldx+','+oldy+']');
+				socket.send('['+oldx+','+oldy+']');
 			}
 		}, 20);
-  };
+	};
 </script>
 </body>
 </html>
@@ -149,30 +150,62 @@ function tid(t)
 end
 
 GET('/ws-test', function(req, res)
-  local err, errMsg = websocketHandler.serverHandler(req, res)
+	local err, errMsg = websocketHandler.serverHandler(req, res)
 
-  if (err ~= nil) then
-    res.status = 400
-	  res.headers['Content-Type'] = 'text/plain'
-	  res:add('Websocket Failure!\n' .. err .. "\n")
-		return 
-  end
+	if (err ~= nil) then
+		res.status = 400
+		res.headers['Content-Type'] = 'text/plain'
+		res:add('Websocket Failure!\n' .. err .. "\n")
+		return
+	end
 
 	err, payload = res:getFrame()
-  res:sendText(payload)
+	res:sendText(payload)
+	res:sendText("bye\n")
+	res:close();
+end)
+
+
+local clientsList = {}
+
+GET('/ws-test2', function(req, res)
+	local err, errMsg = websocketHandler.serverHandler(req, res)
+
+	if (err ~= nil) then
+		res.status = 400
+		res.headers['Content-Type'] = 'text/plain'
+		res:add('Websocket Failure!\n' .. err .. "\n")
+		return
+	end
+	clientsList[res] = true
+
+	dont_exit = true
+
+	while dont_exit do
+		err, payload = res:getFrame()
+		if err ~= nil then
+			clientsList[res] = nil
+			dont_exit = false
+		end
+		for client, ok in pairs(clientsList) do
+			if ok then
+				client:sendText(payload)
+			end
+		end
+	end
   res:sendText("bye\n")
-  res:close();
+  --res:close();
 end)
 
 GET('/ws', function(req, res)
-  local err, errMsg = websocketHandler.serverHandler(req, res)
+	local err, errMsg = websocketHandler.serverHandler(req, res)
 
-  if (err ~= nil) then
-    res.status = 400
-	  res.headers['Content-Type'] = 'text/plain'
-	  res:add('Websocket Failure!\n' .. err .. "\n")
+	if (err ~= nil) then
+		res.status = 400
+		res.headers['Content-Type'] = 'text/plain'
+		res:add('Websocket Failure!\n' .. err .. "\n")
 		return 
-  end
+	end
 
 	local err, payload
 

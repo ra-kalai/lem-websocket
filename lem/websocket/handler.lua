@@ -272,6 +272,8 @@ function serverWebSocketHandler(req, res)
 
   res.client = client
   res.clientOrServer = 0
+  res.abort = true
+
   setmetatable(res, websocket_metatable)
 
   return nil, nil

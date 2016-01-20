@@ -20,7 +20,7 @@ strip: $(clib)
 install: $(clib) strip
 	mkdir -p $(cmoddir)/lem/websocket
 	mkdir -p $(lmoddir)/lem/websocket
-	install -m 644 lem/websocket/core.so     $(cmoddir)/lem/websocket/
+	install -m 755 lem/websocket/core.so     $(cmoddir)/lem/websocket/
 	install -m 644 lem/websocket/handler.lua $(lmoddir)/lem/websocket/
 
 test:

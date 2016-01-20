@@ -25,7 +25,6 @@ local format = string.format
 utils.poolconfig(100, 10, 20)
 
 hathaway.debug = print -- must be set before import()
-hathaway.debug = function(...) end
 hathaway.import()      -- when using single instance API
 
 
@@ -221,6 +220,7 @@ GET('/ws', function(req, res)
 			brodcastMsg(format('["left", "%s"]', tid(res)))
 			break
 		end
+
 		if (payload == '["join"]') then
 			res:sendText(format('["start", %q, %d]', tid(res), nConn))
 			for k, v in pairs(clientMap) do

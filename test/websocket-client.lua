@@ -30,10 +30,10 @@ utils.poolconfig(100, 10, 20)
 for msgsize = msgsizestart, msgsizemax do 
 
 	utils.spawn(function ()
-		local err, res = websocket.client(url)
+		local res, err = websocket.client(url)
 		local msg = string.rep("a", msgsize)
 	
-		if not err then
+		if res then
 			res:sendText(msg)
 			err, payload = res:getFrame()
 	
@@ -48,7 +48,7 @@ for msgsize = msgsizestart, msgsizemax do
 			end
 			res:close()
 		else
-			print('error on connect', err, res)
+			print('error on connect', table.unpack(err))
 			keep_running = 0
 		end
 	end)

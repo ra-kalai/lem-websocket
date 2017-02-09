@@ -232,7 +232,7 @@ function websocket_metatable:getFrame(strict)
   end
 end
 
-function serverWebSocketHandler(req, res)
+function serverWebSocketHandler(req, res) -- %{
   local upgrade = (req.headers.upgrade or ''):lower()
   local connection = (req.headers.connection or ''):lower()
   local version = (req.headers['sec-websocket-version'] or ''):lower()
@@ -275,44 +275,37 @@ function serverWebSocketHandler(req, res)
   res.abort = true
 
   setmetatable(res, websocket_metatable)
-
-  return nil, nil
-end
+end -- }%
 
 local client = require 'lem.http.client'
 
 function clientWebSocket(url)
   local c = client.new()
 
-  local randomb64string = string.rep('x',12)
-                          :gsub('x', function ()
+  local randomb64string = ('xxxxxxxxxxxx'):gsub('x', function ()
                             return string.char(string.byte('A') + (math.random(100))%25)
                           end)
 
   local res, err = c:get(url, {
-    ['Sec-WebSocket-Version']= 13,
-    ['Connection']= 'Upgrade',
-    ['Upgrade']= 'WebSocket',
-    ['Sec-WebSocket-Key']= randomb64string,
+    ['Sec-WebSocket-Version'] = 13,
+    ['Connection']            = 'Upgrade',
+    ['Upgrade']               = 'WebSocket',
+    ['Sec-WebSocket-Key']     = randomb64string,
   })
 
   if res == nil then
-    return -1, {'connection fail', err}
+    return nil, {-1, 'connection fail', err}
   end
 
-
-
   if res.status ~= 101 then
-    return -2, {'unexpected status', res.status, res.text}
+    return nil, {-2, 'unexpected status', res.status, res.text}
   end
 
   res.clientOrServer = 1
   res.client = res.conn
   res.conn = nil
 
-  setmetatable(res, websocket_metatable)
-
-  return nil, res
+  return setmetatable(res, websocket_metatable)
 end
 
 return { serverHandler = serverWebSocketHandler,

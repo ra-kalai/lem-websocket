@@ -154,11 +154,11 @@ GET('/ws-test', function(req, res)
 	if (err ~= nil) then
 		res.status = 400
 		res.headers['Content-Type'] = 'text/plain'
-		res:add('Websocket Failure!\n' .. err .. "\n")
+		res:add('Websocket Failure!\n' .. errMsg .. "\n")
 		return
 	end
 
-	err, payload = res:getFrame()
+	local err, payload = res:getFrame()
 	res:sendText(payload)
 	res:sendText("bye\n")
 	res:close();
@@ -179,6 +179,8 @@ GET('/ws-test2', function(req, res)
 	clientsList[res] = true
 
 	dont_exit = true
+
+	local payload
 
 	while dont_exit do
 		err, payload = res:getFrame()

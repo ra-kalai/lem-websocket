@@ -279,19 +279,36 @@ end -- }%
 
 local client = require 'lem.http.client'
 
-function clientWebSocket(url)
-  local c = client.new()
-
+function clientWebSocket(to)
   local randomb64string = ('xxxxxxxxxxxx'):gsub('x', function ()
                             return string.char(string.byte('A') + (math.random(100))%25)
                           end)
 
-  local res, err = c:get(url, {
-    ['Sec-WebSocket-Version'] = 13,
-    ['Connection']            = 'Upgrade',
-    ['Upgrade']               = 'WebSocket',
-    ['Sec-WebSocket-Key']     = randomb64string,
-  })
+  local request_detail = {
+    url=to,
+    method='GET',
+    headers = {
+      ['Sec-WebSocket-Version'] = 13,
+      ['Connection']            = 'Upgrade',
+      ['Upgrade']               = 'WebSocket',
+      ['Sec-WebSocket-Key']     = randomb64string,
+  }}
+
+  local c = client.new()
+
+  if type(to) == "table" then
+    request_detail.url = to.url
+    if to.req then
+      for k, v in pairs(to.req) do
+        request_detail[k] = v
+      end
+    end
+    if to.ssl then
+      c.ssl = to.ssl
+    end
+  end
+
+  local res, err = c:request(request_detail)
 
   if res == nil then
     return nil, {-1, 'connection fail', err}

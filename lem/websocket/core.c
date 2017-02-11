@@ -116,7 +116,7 @@ lem_websocket_decode_frame_payload(lua_State *T) {
                     | (uint32_t)xor_key_buf[2] << 16
                     | (uint32_t)xor_key_buf[3] << 24;
     int e;
-    for(i=0,e=payload_buf_len-4;i<=e;i+=4) {
+    for(i=0,e=(int)payload_buf_len-4;i<=e;i+=4) {
       (*(uint32_t*)(&payload_buf[i])) ^=  xorkey;
     }
 #elif defined(__x86_64__)
@@ -129,13 +129,13 @@ lem_websocket_decode_frame_payload(lua_State *T) {
                       | (uint64_t)xor_key_buf[2] << 48
                       | (uint64_t)xor_key_buf[3] << 56;
     int e;
-    for(i=0,e=payload_buf_len-8;i<=e;i+=8) {
+    for(i=0,e=(int)payload_buf_len-8;i<=e;i+=8) {
       (*(uint64_t*)(&payload_buf[i])) ^= xorkey64;
     }
 #else
     i = 0;
 #endif
-  for(;i<payload_buf_len;i++) {
+  for(;i<(int)payload_buf_len;i++) {
     payload_buf[i] ^= xor_key_buf[i%4];
   }
 
@@ -303,7 +303,7 @@ lem_websocket_buildframe(lua_State *T) {
 
 #if defined(__i386__)
     int e;
-    for(i=0,e=buf_len-4;i<=e;i+=4) {
+    for(i=0,e=(int)buf_len-4;i<=e;i+=4) {
       (*((uint32_t*)(&frame[i+findex]))) = (*((uint32_t*)(&buf[i]))) ^ xorkey;
     }
 #elif defined(__x86_64__)
@@ -316,13 +316,13 @@ lem_websocket_buildframe(lua_State *T) {
                       | (uint64_t)xorkey_buf[2] << 48
                       | (uint64_t)xorkey_buf[3] << 56;
     int e;
-    for(i=0,e=buf_len-8;i<=e;i+=8) {
+    for(i=0,e=(int)buf_len-8;i<=e;i+=8) {
       (*(uint64_t*)(&frame[i+findex])) = (*((uint64_t*)(&buf[i]))) ^ xorkey64;
     }
 #else
     i = 0;
 #endif
-    for(;i<buf_len;i+=1) {
+    for(;i<(int)buf_len;i+=1) {
       frame[i+findex] = buf[i] ^ xorkey_buf[i%4];
     }
   } else {

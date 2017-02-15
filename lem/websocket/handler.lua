@@ -18,6 +18,10 @@ function websocket_metatable:sendBinary(payload)
   return self.client:write(websocket_frame(payload, 0x82, self.clientOrServer))
 end
 
+function websocket_metatable:ping(payload)
+  return self.client:write(websocket_frame(payload, 0x9, self.clientOrServer))
+end
+
 -- This function is called once we return from a hathaway hook.
 -- no need to take the previous defined function, as headers can't be
 -- appended to a websocket connection.

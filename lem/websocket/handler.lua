@@ -104,7 +104,7 @@ local reactionOnOpcode = {
   -- ping
   [9] = function (res, fin, payload)
     -- send a pong
-    res.client:write(websocket_frame(payload, 0xA, 0))
+    res.client:write(websocket_frame(payload, 0xA, res.clientOrServer))
     return res:getFrame()
   end,
   -- pong

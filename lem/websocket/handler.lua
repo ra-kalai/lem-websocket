@@ -160,6 +160,7 @@ function websocket_metatable:getFrame(strict)
     headerSecondPartLen = headerSecondPartLen + 8
   end
 
+  local payload, errmsg
   if headerSecondPartLen ~= 0 then
     local frameSecondPart, errmsg = client:read(headerSecondPartLen)
 
@@ -173,7 +174,7 @@ function websocket_metatable:getFrame(strict)
       finalPayloadLen = payload_len
     end
 
-    local payload, errmsg = client:read(finalPayloadLen)
+    payload, errmsg = client:read(finalPayloadLen)
 
     if payload == nil then
       return -1, "On payload " .. errmsg
@@ -213,7 +214,7 @@ function websocket_metatable:getFrame(strict)
     end
   else
     -- small payload
-    local payload = client:read(payload_len)
+    payload, errmsg = client:read(payload_len)
 
     if payload == nil then
       return -1, "On payload " .. errmsg

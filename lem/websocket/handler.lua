@@ -277,7 +277,7 @@ function serverWebSocketHandler(req, res) -- %{
 
   res.client = client
   res.clientOrServer = 0
-  res.abort = true
+  res.detach = true
 
   setmetatable(res, websocket_metatable)
 end -- }%

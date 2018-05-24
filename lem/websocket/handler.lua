@@ -53,7 +53,7 @@ local reactionOnOpcode = {
       res.continuation = nil
       return nil, payload
     else
-      local err, npayload = self:getFrame()
+      local err, npayload = res:getFrame()
       if err then
         return err, npayload
       end
@@ -71,7 +71,7 @@ local reactionOnOpcode = {
       return nil, payload
     else
       self.continuation = 1
-      local err, npayload = self:getFrame()
+      local err, npayload = res:getFrame()
       if err then
         return err, npayload
       end
@@ -89,7 +89,7 @@ local reactionOnOpcode = {
       return nil, payload
     else
       res.continuation = 1
-      local err, npayload = self:getFrame()
+      local err, npayload = res:getFrame()
       if err then
         return err, npayload
       end
